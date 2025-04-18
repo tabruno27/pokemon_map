@@ -14,3 +14,11 @@ class PokemonEntity(models.Model):
     lon = models.FloatField()
     appeared_at= models.DateTimeField(null=True)
     disappeared_at= models.DateTimeField(null=True)
+    level = models.IntegerField(default=1)
+    health = models.IntegerField(default=100)
+    strength = models.IntegerField(default=10)
+    defence = models.IntegerField(default=10)
+    stamina = models.IntegerField(default=10)
+
+    def __str__(self):
+        return f"{self.pokemon.name} at ({self.lat}, {self.lon})"
