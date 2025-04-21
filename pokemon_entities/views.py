@@ -67,6 +67,7 @@ def show_pokemon(request, pokemon_id):
         'title_ru': requested_pokemon.title,
         "pokemon_id": requested_pokemon.id,
         'img_url': request.build_absolute_uri(requested_pokemon.photo.url),
+        'description': requested_pokemon.description,
 
     }
 
