@@ -21,4 +21,4 @@ class PokemonEntity(models.Model):
     stamina = models.IntegerField(default=10)
 
     def __str__(self):
-        return f"{self.pokemon.name} at ({self.lat}, {self.lon})"
+        return f"{self.pokemon.title} at ({self.lat}, {self.lon})"
