@@ -8,6 +8,10 @@ class Pokemon(models.Model):
     title_jp = models.CharField(max_length=200)
     photo = models.ImageField(upload_to='pokemon', default="default photo")
     description = models.TextField(blank=True)
+    previous_evolution = models.ForeignKey('self', on_delete=models.SET_NULL,
+                                       null=True, blank=True, related_name='previous_evolutions')
+    next_evolution = models.ForeignKey('self', on_delete=models.SET_NULL,
+                                       null=True, blank=True, related_name='next_evolutions')
 
     def __str__(self):
         return f'{self.title} ({self.title_ru}, {self.title_en}, {self.title_jp})'

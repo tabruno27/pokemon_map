@@ -63,6 +63,26 @@ def show_pokemon(request, pokemon_id):
     except Pokemon.DoesNotExist:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
+    previous_evolution_data = None
+    if requested_pokemon.previous_evolution:
+        previous_evolution_data = {
+            'title_ru': requested_pokemon.previous_evolution.title_ru,
+            'title_en': requested_pokemon.previous_evolution.title_en,
+            'title_jp': requested_pokemon.previous_evolution.title_jp,
+            'img_url': request.build_absolute_uri(requested_pokemon.previous_evolution.photo.url),
+            'pokemon_id': requested_pokemon.previous_evolution.id,
+        }
+
+    next_evolution_data  = None
+    if requested_pokemon.next_evolution:
+        next_evolution_data = {
+            'title_ru': requested_pokemon.next_evolution.title_ru,
+            'title_en': requested_pokemon.next_evolution.title_en,
+            'title_jp': requested_pokemon.next_evolution.title_jp,
+            'img_url': request.build_absolute_uri(requested_pokemon.next_evolution.photo.url),
+            'pokemon_id': requested_pokemon.next_evolution.id,
+        }
+
     pokemon_data = {
         'title_ru': requested_pokemon.title_ru,
         'title_en': requested_pokemon.title_en,
@@ -70,7 +90,8 @@ def show_pokemon(request, pokemon_id):
         "pokemon_id": requested_pokemon.id,
         'img_url': request.build_absolute_uri(requested_pokemon.photo.url),
         'description': requested_pokemon.description,
-
+        'previous_evolution': previous_evolution_data,
+        'next_evolution': next_evolution_data,
     }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
@@ -79,10 +100,10 @@ def show_pokemon(request, pokemon_id):
         add_pokemon(
             folium_map, pokemon_entity.lat,
             pokemon_entity.lon,
-            pokemon_data['img_url']
+            pokemon_data['img_url'],
         )
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
-        'pokemon': pokemon_data
+        'pokemon': pokemon_data,
     })
