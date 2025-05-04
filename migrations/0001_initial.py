@@ -16,7 +16,6 @@ class Migration(migrations.Migration):
             name='Pokemon',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(blank=True, max_length=200, null=True)),
                 ('title_ru', models.CharField(max_length=200)),
                 ('title_en', models.CharField(max_length=200)),
                 ('title_jp', models.CharField(max_length=200)),
