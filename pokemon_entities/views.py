@@ -2,6 +2,7 @@ import folium
 import json
 
 from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from .models import Pokemon, PokemonEntity
 from django.utils import timezone
@@ -48,7 +49,7 @@ def show_all_pokemons(request):
         pokemons_on_page.append({
             'pokemon_id': pokemon.id,
             'img_url': request.build_absolute_uri(pokemon.photo.url),
-            'title_ru': pokemon.title,
+            'title_ru': pokemon.title_ru,
         })
 
     return render(request, 'mainpage.html', context={
@@ -58,10 +59,7 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    try:
-        requested_pokemon = Pokemon.objects.get(id=pokemon_id)
-    except Pokemon.DoesNotExist:
-        return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
+    requested_pokemon = get_object_or_404(Pokemon, id=pokemon_id)
 
     previous_evolution_data = None
     if requested_pokemon.previous_evolution:
@@ -73,14 +71,15 @@ def show_pokemon(request, pokemon_id):
             'pokemon_id': requested_pokemon.previous_evolution.id,
         }
 
-    next_evolution_data  = None
-    if requested_pokemon.next_evolution:
+    next_evolution_data = None
+    if requested_pokemon.next_evolutions.exists():
+        next_evolution = requested_pokemon.next_evolutions.first()  # Выбираем первого потомка
         next_evolution_data = {
-            'title_ru': requested_pokemon.next_evolution.title_ru,
-            'title_en': requested_pokemon.next_evolution.title_en,
-            'title_jp': requested_pokemon.next_evolution.title_jp,
-            'img_url': request.build_absolute_uri(requested_pokemon.next_evolution.photo.url),
-            'pokemon_id': requested_pokemon.next_evolution.id,
+            'title_ru': next_evolution.title_ru,
+            'title_en': next_evolution.title_en,
+            'title_jp': next_evolution.title_jp,
+            'img_url': request.build_absolute_uri(next_evolution.photo.url),
+            'pokemon_id': next_evolution.id,
         }
 
     pokemon_data = {
@@ -96,12 +95,16 @@ def show_pokemon(request, pokemon_id):
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
 
-    for pokemon_entity in requested_pokemon.pokemonentity_set.all():
-        add_pokemon(
-            folium_map, pokemon_entity.lat,
-            pokemon_entity.lon,
-            pokemon_data['img_url'],
-        )
+    next_evolutions = requested_pokemon.next_evolutions.all()
+    for next_evolution in next_evolutions:
+        entities = PokemonEntity.objects.filter(pokemon=next_evolution)
+        for entity in entities:
+            add_pokemon(
+                folium_map,
+                entity.lat,
+                entity.lon,
+                pokemon_data['img_url'],
+            )
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
